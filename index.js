@@ -1,7 +1,7 @@
 import _template from 'lodash.template';
 import * as types from 'babel-types';
 
-const pluginName = 'babel-transform-imports';
+const pluginName = 'babel-plugin-transform-imports';
 
 export default function() {
     return {
