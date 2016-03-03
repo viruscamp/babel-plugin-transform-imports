@@ -1,7 +1,8 @@
 {
-  "name": "babel-transform-imports",
+  "name": "babel-plugin-transform-imports",
   "version": "0.0.1",
   "description": "Transforms member style imports (import {x} from 'y') into default style imports (import x from 'y/lib/x')",
+  "keywords": ["babel", "transform", "import", "react-bootstrap"],
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -11,7 +12,7 @@
   "scripts": {
     "test": "node_modules/.bin/mocha --compilers js:babel-register"
   },
-  "author": "Dave Elton",
+  "author": "AMC Theatres",
   "license": "ISC",
   "dependencies": {
     "babel-types": "^6.6.0",
