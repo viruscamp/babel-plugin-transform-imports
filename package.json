@@ -1,8 +1,13 @@
 {
   "name": "babel-plugin-transform-imports",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Transforms member style imports (import {x} from 'y') into default style imports (import x from 'y/lib/x')",
-  "keywords": ["babel", "transform", "import", "react-bootstrap"],
+  "keywords": [
+    "babel",
+    "transform",
+    "import",
+    "react-bootstrap"
+  ],
   "main": "index.js",
   "repository": {
     "type": "git",
