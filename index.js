@@ -1,12 +1,12 @@
-import _template from 'lodash.template';
-import * as types from 'babel-types';
+var _template = require('lodash.template');
+var types = require('babel-types');
 
-const pluginName = 'babel-plugin-transform-imports';
+var pluginName = 'babel-plugin-transform-imports';
 
-export default function() {
+module.exports = function() {
     return {
         visitor: {
-            ImportDeclaration: (path, state) => {
+            ImportDeclaration: function (path, state) {
                 // https://github.com/babel/babel/tree/master/packages/babel-types#timportdeclarationspecifiers-source
 
                 // path.node has properties 'source' and 'specifiers' attached.
@@ -14,18 +14,18 @@ export default function() {
                 // path.node.specifiers is an array of ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier
 
                 if (path.node.source.value in state.opts) {
-                    const source = path.node.source.value;
-                    const opts = state.opts[source];
+                    var source = path.node.source.value;
+                    var opts = state.opts[source];
 
                     if (!opts.transform) {
-                        throw new Error(`${pluginName}: transform option is required for module ${source}`);
+                        throw new Error(pluginName + ': transform option is required for module ' + source);
                     }
-                    const sourceTransformTemplate = _template(opts.transform);
+                    var sourceTransformTemplate = _template(opts.transform);
 
-                    const transforms = [];
+                    var transforms = [];
 
-                    const fullImports = path.node.specifiers.filter(specifier => specifier.type !== 'ImportSpecifier');
-                    const memberImports = path.node.specifiers.filter(specifier => specifier.type === 'ImportSpecifier');
+                    var fullImports = path.node.specifiers.filter(function(specifier) { return specifier.type !== 'ImportSpecifier' });
+                    var memberImports = path.node.specifiers.filter(function(specifier) { return specifier.type === 'ImportSpecifier' });
 
                     if (fullImports.length > 0) {
                         // Examples of "full" imports:
@@ -33,7 +33,7 @@ export default function() {
                         //      import name from 'module'; (ImportDefaultSpecifier)
 
                         if (opts.preventFullImport)
-                            throw new Error(`${pluginName}: import of entire module ${source} not allowed due to preventFullImport setting`);
+                            throw new Error(pluginName + ': import of entire module ${source} not allowed due to preventFullImport setting');
 
                         if (memberImports.length > 0) {
                             // Swap out the import with one that doesn't include member imports.  Member imports should each get their own import line
@@ -41,11 +41,11 @@ export default function() {
                             //      import Bootstrap, { Grid } from 'react-bootstrap';
                             // into this:
                             //      import Bootstrap from 'react-bootstrap';
-                            transforms.push(types.importDeclaration(fullImports, types.stringLiteral(source)));    
+                            transforms.push(types.importDeclaration(fullImports, types.stringLiteral(source)));
                         }
                     }
 
-                    memberImports.forEach(memberImport => {
+                    memberImports.forEach(function(memberImport) {
                         // Examples of member imports:
                         //      import { member } from 'module'; (ImportSpecifier)
                         //      import { member as alias } from 'module' (ImportSpecifier)
