@@ -33,7 +33,7 @@ module.exports = function() {
                         //      import name from 'module'; (ImportDefaultSpecifier)
 
                         if (opts.preventFullImport)
-                            throw new Error(pluginName + ': import of entire module ${source} not allowed due to preventFullImport setting');
+                            throw new Error(pluginName + ': import of entire module ' + source + ' not allowed due to preventFullImport setting');
 
                         if (memberImports.length > 0) {
                             // Swap out the import with one that doesn't include member imports.  Member imports should each get their own import line
