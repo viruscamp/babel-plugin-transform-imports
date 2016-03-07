@@ -4,6 +4,7 @@ Transforms member style imports:
 
 ```javascript
     import { Row, Grid as MyGrid } from 'react-bootstrap';
+    import { merge } from 'lodash';
 ```
 
 ...into default style imports:
@@ -11,6 +12,7 @@ Transforms member style imports:
 ```javascript
     import Row from 'react-bootstrap/lib/Row';
     import MyGrid from 'react-bootstrap/lib/Grid';
+    import merge from 'lodash/merge';
 ```
 
 ## That's stupid, why would you do that?
@@ -30,9 +32,9 @@ it will generate something similarish to:
     var Col = reactBootstrap.Col;
 ```
 
-Some libraries, such as react-bootstrap, are rather large and pulling in the
-entire module just to use a few pieces would be a big waste.  The only way
-around this is to use default style imports:
+Some libraries, such as react-bootstrap and lodash, are rather large and
+pulling in the entire module just to use a few pieces would be a big waste.  The
+only way around this is to use default style imports:
 
 ```javascript
     import Grid from 'react-bootstrap/lib/Grid';
@@ -68,6 +70,10 @@ npm install --save-dev babel-plugin-transform-imports
                 "react-bootstrap": {
                     "transform": "react-bootstrap/lib/${member}",
                     "preventFullImport": true
+                },
+                "lodash": {
+                    "transform": "lodash/${member}",
+                    "preventFullImport": true
                 }
             }]
         ]
@@ -75,6 +81,11 @@ npm install --save-dev babel-plugin-transform-imports
 ```
 
 That's it!
+
+*Note: this plugin is not restricted to the react-bootstrap and lodash
+libraries.  You may use it with any library, where the options keys
+(**react-bootstrap** and **lodash** above) are the actual names of the
+libraries.*
 
 ## Options
 
