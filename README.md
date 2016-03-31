@@ -33,8 +33,9 @@ it will generate something similarish to:
 ```
 
 Some libraries, such as react-bootstrap and lodash, are rather large and
-pulling in the entire module just to use a few pieces would be a big waste.  The
-only way around this is to use default style imports:
+pulling in the entire module just to use a few pieces would cause unnecessary
+bloat to your client optimized (webpack etc.) bundle.  The only way around
+this is to use default style imports:
 
 ```javascript
     import Grid from 'react-bootstrap/lib/Grid';

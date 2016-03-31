@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-imports",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Transforms member style imports (import {x} from 'y') into default style imports (import x from 'y/lib/x')",
   "keywords": [
     "babel",
@@ -20,8 +20,7 @@
   "author": "AMC Theatres",
   "license": "ISC",
   "dependencies": {
-    "babel-types": "^6.6.0",
-    "lodash.template": "^4.2.2"
+    "babel-types": "^6.6.0"
   },
   "devDependencies": {
     "babel-core": "^6.6.0",

@@ -1,4 +1,3 @@
-var _template = require('lodash.template');
 var types = require('babel-types');
 
 var pluginName = 'babel-plugin-transform-imports';
@@ -20,7 +19,6 @@ module.exports = function() {
                     if (!opts.transform) {
                         throw new Error(pluginName + ': transform option is required for module ' + source);
                     }
-                    var sourceTransformTemplate = _template(opts.transform);
 
                     var transforms = [];
 
@@ -54,9 +52,12 @@ module.exports = function() {
                         //      import { Grid as gird } from 'react-bootstrap';
                         // into this:
                         //      import gird from 'react-bootstrap/lib/Grid';
+
+                        var replace = opts.transform.replace(/\$\{\s?member\s?\}/ig, memberImport.imported.name);
+
                         transforms.push(types.importDeclaration(
                             [types.importDefaultSpecifier(types.identifier(memberImport.local.name))],
-                            types.stringLiteral(sourceTransformTemplate({ member: memberImport.imported.name }))
+                            types.stringLiteral(replace)
                         ));
                     });
 
