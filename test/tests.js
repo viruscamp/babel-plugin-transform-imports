@@ -1,9 +1,9 @@
 import assert from 'assert';
 import * as babel from 'babel-core';
 
-function createOptions(preventFullImport = false, transform = 'react-bootstrap/lib/${member}') {
+function createOptions({ preventFullImport = false, transform = 'react-bootstrap/lib/${member}', kebabCase = false }) {
     return {
-        'react-bootstrap': { transform, preventFullImport }
+        'react-bootstrap': { transform, preventFullImport, kebabCase }
     };
 };
 
@@ -14,7 +14,7 @@ function occurances(regex, test) {
     return (test.match(regex) || []).length;
 }
 
-function transform(code, options = createOptions()) {
+function transform(code, options = createOptions({})) {
     return babel.transform(code, {
         presets: ['es2015'],
         plugins: [['./index', options]]
@@ -51,21 +51,31 @@ describe('import transformations', function() {
     });
 });
 
+describe('kebabCase plugin option', function() {
+    it('should use kebab casing when set', function() {
+        let options = createOptions({ kebabCase: true });
+
+        let code = transform(`import { KebabMe } from 'react-bootstrap'; LocalName.test = null;`, options);
+
+        assert.notEqual(code.indexOf('kebab-me'), -1, 'member name KababMe should be transformed to kebab-me');
+    });
+});
+
 describe('preventFullImport plugin option', function() {
     it('should throw on default imports when truthy', function() {
-        let options = createOptions(true);
+        let options = createOptions({ preventFullImport: true });
         
         assert.throws(() => {transform(`import Bootstrap from 'react-bootstrap';`, options)});
     });
 
     it('should throw on namespace imports when truthy', function() {
-        let options = createOptions(true);
+        let options = createOptions({ preventFullImport: true });
         
         assert.throws(() => {transform(`import * as Bootstrap from 'react-bootstrap';`, options)});
     });
 
     it('should not throw on member imports when truthy', function() {
-        let options = createOptions(true);
+        let options = createOptions({ preventFullImport: true });
         
         assert.doesNotThrow(() => {transform(`import { Grid, Row as row } from 'react-bootstrap';`, options)});
     });
@@ -73,7 +83,7 @@ describe('preventFullImport plugin option', function() {
 
 describe('edge cases', function() {
     it('should throw when transform plugin option is missing', function() {
-        let options = createOptions(false, null);
+        let options = createOptions({ transform: null });
 
         assert.throws(() => {transform(`import Bootstrap from 'react-bootstrap';`, options)});
     });

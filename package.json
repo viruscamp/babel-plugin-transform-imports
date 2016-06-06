@@ -7,7 +7,7 @@
     "transform",
     "import",
     "react-bootstrap",
-	"lodash"
+    "lodash"
   ],
   "main": "index.js",
   "repository": {
@@ -21,7 +21,8 @@
   "author": "AMC Theatres",
   "license": "ISC",
   "dependencies": {
-    "babel-types": "^6.6.0"
+    "babel-types": "^6.6.0",
+    "lodash.kebabcase": "^4.0.1"
   },
   "devDependencies": {
     "babel-core": "^6.6.0",

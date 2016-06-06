@@ -94,3 +94,4 @@ libraries.*
 | --- | --- | --- | --- | --- |
 | `transform` | `string` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the member, aka Grid/Row/Col/etc. |
 | `preventFullImport` | `boolean` | no | `false` | Whether or not to throw when an import is encountered which would cause the entire module to be imported. |
+| `kebabCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.kebabCase. |

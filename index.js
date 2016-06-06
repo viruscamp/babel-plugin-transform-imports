@@ -1,4 +1,5 @@
 var types = require('babel-types');
+var kebab = require('lodash.kebabcase');
 
 var pluginName = 'babel-plugin-transform-imports';
 
@@ -53,7 +54,10 @@ module.exports = function() {
                         // into this:
                         //      import gird from 'react-bootstrap/lib/Grid';
 
-                        var replace = opts.transform.replace(/\$\{\s?member\s?\}/ig, memberImport.imported.name);
+                        var importName = memberImport.imported.name;
+                        if (opts.kebabCase) importName = kebab(importName);
+
+                        var replace = opts.transform.replace(/\$\{\s?member\s?\}/ig, importName);
 
                         transforms.push(types.importDeclaration(
                             [types.importDefaultSpecifier(types.identifier(memberImport.local.name))],
