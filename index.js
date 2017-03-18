@@ -1,7 +1,29 @@
 var types = require('babel-types');
 var kebab = require('lodash.kebabcase');
 
-var pluginName = 'babel-plugin-transform-imports';
+function barf(msg) {
+    throw new Error('babel-plugin-transform-imports: ' + msg);
+}
+
+function transform(transformOption, importName) {
+    if (/\.js$/i.test(transformOption)) {
+        var transformFn;
+
+        try {
+            transformFn = require(transformOption);
+        } catch (error) {
+            barf('failed to require transform file ' + transformOption);
+        }
+
+        if (typeof transformFn !== 'function') {
+            barf('expected transform function to be exported from ' + transformOption);
+        }
+
+        return transformFn(importName);
+    }
+
+    return transformOption.replace(/\$\{\s?member\s?\}/ig, importName);
+}
 
 module.exports = function() {
     return {
@@ -18,7 +40,7 @@ module.exports = function() {
                     var opts = state.opts[source];
 
                     if (!opts.transform) {
-                        throw new Error(pluginName + ': transform option is required for module ' + source);
+                        barf('transform option is required for module ' + source);
                     }
 
                     var transforms = [];
@@ -31,8 +53,9 @@ module.exports = function() {
                         //      import * as name from 'module'; (ImportNamespaceSpecifier)
                         //      import name from 'module'; (ImportDefaultSpecifier)
 
-                        if (opts.preventFullImport)
-                            throw new Error(pluginName + ': import of entire module ' + source + ' not allowed due to preventFullImport setting');
+                        if (opts.preventFullImport) {
+                            barf('import of entire module ' + source + ' not allowed due to preventFullImport setting');
+                        }
 
                         if (memberImports.length > 0) {
                             // Swap out the import with one that doesn't include member imports.  Member imports should each get their own import line
@@ -57,7 +80,7 @@ module.exports = function() {
                         var importName = memberImport.imported.name;
                         if (opts.kebabCase) importName = kebab(importName);
 
-                        var replace = opts.transform.replace(/\$\{\s?member\s?\}/ig, importName);
+                        var replace = transform(opts.transform, importName);
 
                         transforms.push(types.importDeclaration(
                             [types.importDefaultSpecifier(types.identifier(memberImport.local.name))],
@@ -65,8 +88,9 @@ module.exports = function() {
                         ));
                     });
 
-                    if (transforms.length > 0)
+                    if (transforms.length > 0) {
                         path.replaceWithMultiple(transforms);
+                    }
                 }
             }
         }

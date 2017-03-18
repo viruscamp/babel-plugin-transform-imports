@@ -15,6 +15,9 @@ Transforms member style imports:
     import merge from 'lodash/merge';
 ```
 
+*Note: this plugin is not restricted to the react-bootstrap and lodash
+libraries.  You may use it with any library.*
+
 ## That's stupid, why would you do that?
 
 When Babel encounters a member style import such as:
@@ -81,17 +84,46 @@ npm install --save-dev babel-plugin-transform-imports
     }
 ```
 
-That's it!
+## Advanced Transformations
 
-*Note: this plugin is not restricted to the react-bootstrap and lodash
-libraries.  You may use it with any library, where the options keys
-(**react-bootstrap** and **lodash** above) are the actual names of the
-libraries.*
+In cases where the provided default string replacement transformation is not
+sufficient (for example, needing to execute a RegExp on the import name), you
+may instead provide a path to a .js file which exports a function to run
+instead.  Keep in mind that the .js file will be `require`d relative from this
+plugin's path, likely located in `/node_modules/babel-plugin-transform-imports`.
+You may provide any filename, as long as it ends with `.js`.
+
+.babelrc:
+```json
+    {
+        "plugins": [
+            ["transform-imports", {
+                "my-library": {
+                    "transform": "../../path/to/transform.js",
+                    "preventFullImport": true
+                }
+            }]
+        ]
+    }
+```
+
+/path/to/transform.js:
+```js
+module.exports = function(importName) {
+    return 'my-library/etc/' + importName.toUpperCase();
+};
+```
+
+This is a little bit hacky, but options are a bit limited due to .babelrc being
+a JSON5 file which does not support functions as a type.  In Babel 7.0, it
+appears .babelrc.js files will be supported, at which point this plugin will be
+updated to allow transform functions directly in the configuration file.
+See: https://github.com/babel/babel/pull/4892
 
 ## Options
 
 | Name | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `transform` | `string` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the member, aka Grid/Row/Col/etc. |
+| `transform` | `string` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the member, aka Grid/Row/Col/etc.  Alternatively, pass a path to a .js file which exports a function to process the transform (see Advanced Transformations) |
 | `preventFullImport` | `boolean` | no | `false` | Whether or not to throw when an import is encountered which would cause the entire module to be imported. |
 | `kebabCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.kebabCase. |

@@ -55,9 +55,31 @@ describe('kebabCase plugin option', function() {
     it('should use kebab casing when set', function() {
         let options = createOptions({ kebabCase: true });
 
-        let code = transform(`import { KebabMe } from 'react-bootstrap'; LocalName.test = null;`, options);
+        let code = transform(`import { KebabMe } from 'react-bootstrap';`, options);
 
         assert.notEqual(code.indexOf('kebab-me'), -1, 'member name KababMe should be transformed to kebab-me');
+    });
+});
+
+describe('transform as function', function() {
+    it('should throw when provided filename is invalid', function() {
+        let options = createOptions({ transform: 'missingFile.js' });
+
+        assert.throws(() => {transform(`import { Row } from 'react-bootstrap';`, options)});
+    });
+
+    it('should throw when provided filename does not resolve to a function', function() {
+        let options = createOptions({ transform: './test/invalidTransform.js' });
+
+        assert.throws(() => {transform(`import { Row } from 'react-bootstrap';`, options)});
+    });
+
+    it('should properly execute transform function when provided', function() {
+        let options = createOptions({ transform: './test/transform.js' });
+
+        let code = transform(`import { upperCaseMe } from 'react-bootstrap';`, options);
+
+        assert.notEqual(code.indexOf('UPPERCASEME'), -1, 'member name upperCaseMe should be transformed to UPPERCASEME');
     });
 });
 
