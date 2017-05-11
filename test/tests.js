@@ -1,9 +1,9 @@
 import assert from 'assert';
 import * as babel from 'babel-core';
 
-function createOptions({ preventFullImport = false, transform = 'react-bootstrap/lib/${member}', kebabCase = false }) {
+function createOptions({ preventFullImport = false, transform = 'react-bootstrap/lib/${member}', camelCase = false, kebabCase = false, snakeCase = false }) {
     return {
-        'react-bootstrap': { transform, preventFullImport, kebabCase }
+        'react-bootstrap': { transform, preventFullImport, camelCase, kebabCase, snakeCase }
     };
 };
 
@@ -51,6 +51,16 @@ describe('import transformations', function() {
     });
 });
 
+describe('camelCase plugin option', function() {
+    it('should use camel casing when set', function() {
+        let options = createOptions({ camelCase: true });
+
+        let code = transform(`import { CamelMe } from 'react-bootstrap';`, options);
+
+        assert.notEqual(code.indexOf('camelMe'), -1, 'member name CamelMe should be transformed to camelMe');
+    });
+});
+
 describe('kebabCase plugin option', function() {
     it('should use kebab casing when set', function() {
         let options = createOptions({ kebabCase: true });
@@ -58,6 +68,16 @@ describe('kebabCase plugin option', function() {
         let code = transform(`import { KebabMe } from 'react-bootstrap';`, options);
 
         assert.notEqual(code.indexOf('kebab-me'), -1, 'member name KababMe should be transformed to kebab-me');
+    });
+});
+
+describe('snakeCase plugin option', function() {
+    it('should use snake casing when set', function() {
+        let options = createOptions({ snakeCase: true });
+
+        let code = transform(`import { SnakeMe } from 'react-bootstrap';`, options);
+
+        assert.notEqual(code.indexOf('snake_me'), -1, 'member name SnakeMe should be transformed to snake_me');
     });
 });
 
@@ -86,19 +106,19 @@ describe('transform as function', function() {
 describe('preventFullImport plugin option', function() {
     it('should throw on default imports when truthy', function() {
         let options = createOptions({ preventFullImport: true });
-        
+
         assert.throws(() => {transform(`import Bootstrap from 'react-bootstrap';`, options)});
     });
 
     it('should throw on namespace imports when truthy', function() {
         let options = createOptions({ preventFullImport: true });
-        
+
         assert.throws(() => {transform(`import * as Bootstrap from 'react-bootstrap';`, options)});
     });
 
     it('should not throw on member imports when truthy', function() {
         let options = createOptions({ preventFullImport: true });
-        
+
         assert.doesNotThrow(() => {transform(`import { Grid, Row as row } from 'react-bootstrap';`, options)});
     });
 });
