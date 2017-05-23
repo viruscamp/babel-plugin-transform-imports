@@ -124,7 +124,7 @@ See: https://github.com/babel/babel/pull/4892
 
 This can be used as a plugin with babel-loader.
 
-.babelrc:
+webpack.config.js:
 ```js
 module: {
   rules: [
