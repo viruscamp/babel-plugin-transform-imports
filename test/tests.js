@@ -101,6 +101,14 @@ describe('transform as function', function() {
 
         assert.notEqual(code.indexOf('UPPERCASEME'), -1, 'member name upperCaseMe should be transformed to UPPERCASEME');
     });
+
+    it('should call the transform as a function when provided as so', function() {
+        let options = createOptions({ transform: function(input) { return `path/${input}`; } });
+
+        let code = transform(`import { somePath } from 'react-bootstrap';`, options);
+
+        assert.notEqual(code.indexOf('path/somePath'), -1, 'function should transform somePath to path/somePath');
+    });
 });
 
 describe('preventFullImport plugin option', function() {

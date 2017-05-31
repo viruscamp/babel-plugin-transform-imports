@@ -120,6 +120,37 @@ appears .babelrc.js files will be supported, at which point this plugin will be
 updated to allow transform functions directly in the configuration file.
 See: https://github.com/babel/babel/pull/4892
 
+## Webpack
+
+This can be used as a plugin with babel-loader.
+
+webpack.config.js:
+```js
+module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+            loader: 'babel-loader',
+                query: {
+                    plugins: [
+                        [require('babel-plugin-transform-imports'), {
+                            "my-library": {
+                                "transform": function(importName) {
+                                    return 'my-library/etc/' + importName.toUpperCase();
+                                },
+                                preventFullImport: true
+                            }
+                        }]
+                    ]
+                }
+            }
+        }
+    ]
+}
+```
+
 ## Options
 
 | Name | Type | Required | Default | Description |

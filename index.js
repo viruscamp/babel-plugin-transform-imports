@@ -8,11 +8,12 @@ function barf(msg) {
 }
 
 function transform(transformOption, importName) {
-    if (/\.js$/i.test(transformOption)) {
+    var isFunction = typeof transformOption === 'function';
+    if (/\.js$/i.test(transformOption) || isFunction) {
         var transformFn;
 
         try {
-            transformFn = require(transformOption);
+            transformFn = isFunction ? transformOption : require(transformOption);
         } catch (error) {
             barf('failed to require transform file ' + transformOption);
         }
