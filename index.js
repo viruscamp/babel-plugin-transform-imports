@@ -1,5 +1,7 @@
 var types = require('babel-types');
+var camel = require('lodash.camelcase');
 var kebab = require('lodash.kebabcase');
+var snake = require('lodash.snakecase');
 
 function barf(msg) {
     throw new Error('babel-plugin-transform-imports: ' + msg);
@@ -78,7 +80,9 @@ module.exports = function() {
                         //      import gird from 'react-bootstrap/lib/Grid';
 
                         var importName = memberImport.imported.name;
+                        if (opts.camelCase) importName = camel(importName);
                         if (opts.kebabCase) importName = kebab(importName);
+                        if (opts.snakeCase) importName = snake(importName);
 
                         var replace = transform(opts.transform, importName);
 
