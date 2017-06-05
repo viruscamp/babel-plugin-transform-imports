@@ -79,6 +79,8 @@ module.exports = function() {
                         //      import { Grid as gird } from 'react-bootstrap';
                         // into this:
                         //      import gird from 'react-bootstrap/lib/Grid';
+                        // or this, if skipDefaultConversion = true:
+                        //      import { Grid as gird } from 'react-bootstrap/lib/Grid';
 
                         var importName = memberImport.imported.name;
                         if (opts.camelCase) importName = camel(importName);
@@ -87,8 +89,12 @@ module.exports = function() {
 
                         var replace = transform(opts.transform, importName);
 
+                        var newImportSpecifier = (opts.skipDefaultConversion)
+                            ? memberImport
+                            : types.importDefaultSpecifier(types.identifier(memberImport.local.name));
+
                         transforms.push(types.importDeclaration(
-                            [types.importDefaultSpecifier(types.identifier(memberImport.local.name))],
+                            [newImportSpecifier],
                             types.stringLiteral(replace)
                         ));
                     });

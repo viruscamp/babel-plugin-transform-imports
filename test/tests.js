@@ -1,9 +1,16 @@
 import assert from 'assert';
 import * as babel from 'babel-core';
 
-function createOptions({ preventFullImport = false, transform = 'react-bootstrap/lib/${member}', camelCase = false, kebabCase = false, snakeCase = false }) {
+function createOptions({
+    preventFullImport = false,
+    transform = 'react-bootstrap/lib/${member}',
+    camelCase = false,
+    kebabCase = false,
+    snakeCase = false,
+    skipDefaultConversion = false
+}) {
     return {
-        'react-bootstrap': { transform, preventFullImport, camelCase, kebabCase, snakeCase }
+        'react-bootstrap': { transform, preventFullImport, camelCase, kebabCase, snakeCase, skipDefaultConversion }
     };
 };
 
@@ -129,6 +136,16 @@ describe('preventFullImport plugin option', function() {
 
         assert.doesNotThrow(() => {transform(`import { Grid, Row as row } from 'react-bootstrap';`, options)});
     });
+});
+
+describe('skipDefaultConversion plugin option', function() {
+    it('should retain named import syntax when enabled', function() {
+        let options = createOptions({ skipDefaultConversion: true });
+
+        let code = transform(`import { Grid, Row as row } from 'react-bootstrap';`, options);
+
+        assert.equal(code.indexOf('_interopRequireDefault'), -1, 'skipDefaultConversion should not allow conversion to default import');
+    })
 });
 
 describe('edge cases', function() {

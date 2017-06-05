@@ -160,3 +160,4 @@ module: {
 | `camelCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.camelCase. |
 | `kebabCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.kebabCase. |
 | `snakeCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.snakeCase. |
+| `skipDefaultConversion` | `boolean` | no | `false` | When set to true, will preserve `import { X }` syntax instead of converting to `import X`. |
