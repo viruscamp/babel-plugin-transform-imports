@@ -2,6 +2,7 @@ var types = require('babel-types');
 var camel = require('lodash.camelcase');
 var kebab = require('lodash.kebabcase');
 var snake = require('lodash.snakecase');
+var pathLib = require('path');
 
 function barf(msg) {
     throw new Error('babel-plugin-transform-imports: ' + msg);
@@ -38,8 +39,16 @@ module.exports = function() {
                 // path.node.source is the library/module name, aka 'react-bootstrap'.
                 // path.node.specifiers is an array of ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier
 
-                if (path.node.source.value in state.opts) {
-                    var source = path.node.source.value;
+                var source = path.node.source.value;
+
+                if (!(source in state.opts) && source.match(/^\.{0,2}\//)) {
+                    source = pathLib.resolve(pathLib.join(
+                        source[0] === '/' ? '' : pathLib.dirname(state.file.opts.filename),
+                        source
+                    ));
+                }
+
+                if (source in state.opts) {
                     var opts = state.opts[source];
 
                     if (!opts.transform) {
