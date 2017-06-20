@@ -1,5 +1,6 @@
 import assert from 'assert';
 import * as babel from 'babel-core';
+import path from 'path';
 
 function createOptions({
     preventFullImport = false,
@@ -7,10 +8,11 @@ function createOptions({
     camelCase = false,
     kebabCase = false,
     snakeCase = false,
-    skipDefaultConversion = false
+    skipDefaultConversion = false,
+    libraryName = 'react-bootstrap'
 }) {
     return {
-        'react-bootstrap': { transform, preventFullImport, camelCase, kebabCase, snakeCase, skipDefaultConversion }
+        [libraryName]: { transform, preventFullImport, camelCase, kebabCase, snakeCase, skipDefaultConversion }
     };
 };
 
@@ -55,6 +57,15 @@ describe('import transformations', function() {
 
         assert.equal(occurrences(fullImportRegex, code), 1, 'number of full imports should be 1');
         assert.equal(occurrences(memberImportRegex, code), 2, 'number of member imports should be 2');
+    });
+
+    it('should handle relative filenames', function() {
+        const libraryName = path.join(__dirname, '../local/path');
+        const _transform = path.join(__dirname, '../local/path/${member}');
+        const options = createOptions({ libraryName, transform: _transform })
+        const code = transform(`import { LocalThing } from './local/path'`, options);
+
+        assert.equal(/require\('.*LocalThing'\);$/m.test(code), true, 'LocalThing should be directly required');
     });
 });
 

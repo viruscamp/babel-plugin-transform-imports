@@ -41,6 +41,7 @@ module.exports = function() {
 
                 var source = path.node.source.value;
 
+                // This block handles relative paths, such as ./components, ../../components, etc.
                 if (!(source in state.opts) && source.match(/^\.{0,2}\//)) {
                     source = pathLib.resolve(pathLib.join(
                         source[0] === '/' ? '' : pathLib.dirname(state.file.opts.filename),
