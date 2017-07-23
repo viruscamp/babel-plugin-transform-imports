@@ -3,16 +3,16 @@
 Transforms member style imports:
 
 ```javascript
-    import { Row, Grid as MyGrid } from 'react-bootstrap';
-    import { merge } from 'lodash';
+import { Row, Grid as MyGrid } from 'react-bootstrap';
+import { merge } from 'lodash';
 ```
 
 ...into default style imports:
 
 ```javascript
-    import Row from 'react-bootstrap/lib/Row';
-    import MyGrid from 'react-bootstrap/lib/Grid';
-    import merge from 'lodash/merge';
+import Row from 'react-bootstrap/lib/Row';
+import MyGrid from 'react-bootstrap/lib/Grid';
+import merge from 'lodash/merge';
 ```
 
 *Note: this plugin is not restricted to the react-bootstrap and lodash
@@ -23,16 +23,16 @@ libraries.  You may use it with any library.*
 When Babel encounters a member style import such as:
 
 ```javascript
-    import { Grid, Row, Col } from 'react-bootstrap';
+import { Grid, Row, Col } from 'react-bootstrap';
 ```
 
 it will generate something similarish to:
 
 ```javascript
-    var reactBootstrap = require('react-bootstrap');
-    var Grid = reactBootstrap.Grid;
-    var Row = reactBootstrap.Row;
-    var Col = reactBootstrap.Col;
+var reactBootstrap = require('react-bootstrap');
+var Grid = reactBootstrap.Grid;
+var Row = reactBootstrap.Row;
+var Col = reactBootstrap.Col;
 ```
 
 Some libraries, such as react-bootstrap and lodash, are rather large and
@@ -41,9 +41,9 @@ bloat to your client optimized (webpack etc.) bundle.  The only way around
 this is to use default style imports:
 
 ```javascript
-    import Grid from 'react-bootstrap/lib/Grid';
-    import Row from 'react-bootstrap/lib/Row';
-    import Col from 'react-bootstrap/lib/Col';
+import Grid from 'react-bootstrap/lib/Grid';
+import Row from 'react-bootstrap/lib/Row';
+import Col from 'react-bootstrap/lib/Col';
 ```
 
 But, the more pieces we need, the more this sucks.  This plugin will allow you
@@ -52,9 +52,9 @@ Additionally, it can be configured to throw when somebody accidentally writes
 an import which would cause the entire module to resolve, such as:
 
 ```javascript
-    import Bootstrap, { Grid } from 'react-bootstrap';
-    // -- or --
-    import * as Bootstrap from 'react-bootstrap';
+import Bootstrap, { Grid } from 'react-bootstrap';
+// -- or --
+import * as Bootstrap from 'react-bootstrap';
 ```
 
 ## Installation
@@ -68,20 +68,20 @@ npm install --save-dev babel-plugin-transform-imports
 *In .babelrc:*
 
 ```json
-    {
-        "plugins": [
-            ["transform-imports", {
-                "react-bootstrap": {
-                    "transform": "react-bootstrap/lib/${member}",
-                    "preventFullImport": true
-                },
-                "lodash": {
-                    "transform": "lodash/${member}",
-                    "preventFullImport": true
-                }
-            }]
-        ]
-    }
+{
+    "plugins": [
+        ["transform-imports", {
+            "react-bootstrap": {
+                "transform": "react-bootstrap/lib/${member}",
+                "preventFullImport": true
+            },
+            "lodash": {
+                "transform": "lodash/${member}",
+                "preventFullImport": true
+            }
+        }]
+    ]
+}
 ```
 
 ## Advanced Transformations
@@ -95,16 +95,16 @@ You may provide any filename, as long as it ends with `.js`.
 
 .babelrc:
 ```json
-    {
-        "plugins": [
-            ["transform-imports", {
-                "my-library": {
-                    "transform": "../../path/to/transform.js",
-                    "preventFullImport": true
-                }
-            }]
-        ]
-    }
+{
+    "plugins": [
+        ["transform-imports", {
+            "my-library": {
+                "transform": "../../path/to/transform.js",
+                "preventFullImport": true
+            }
+        }]
+    ]
+}
 ```
 
 /path/to/transform.js:
