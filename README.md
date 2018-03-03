@@ -16,7 +16,7 @@ import merge from 'lodash/merge';
 ```
 
 *Note: this plugin is not restricted to the react-bootstrap and lodash
-libraries.  You may use it with any library. Besides, it support advanced configuration to apply transformation in your project structure.*
+libraries.  You may use it with any library.*
 
 ## That's stupid, why would you do that?
 
