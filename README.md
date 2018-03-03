@@ -16,7 +16,7 @@ import merge from 'lodash/merge';
 ```
 
 *Note: this plugin is not restricted to the react-bootstrap and lodash
-libraries.  You may use it with any library.*
+libraries.  You may use it with any library. Besides, it support advanced configuration to apply transformation in your project structure.*
 
 ## That's stupid, why would you do that?
 
@@ -86,6 +86,42 @@ npm install --save-dev babel-plugin-transform-imports
 
 ## Advanced Transformations
 
+### Use regex expressions
+
+Sometimes you may enforce the same convention in all folder levels on the structure of your libraries. For achieving this dynamism, you may use regexp to cover all tranformations.
+
+.babelrc:
+
+```json
+{
+    "plugins": [
+        ["transform-imports", {
+            "my-library\/?(((\\w*)?\/?)*)": {
+                "transform": "my-library/${1}/${member}",
+                "preventFullImport": true
+            }
+        }]
+    ]
+}
+```
+
+For instance, the previous configuration will solve properly the next scenarios.
+
+```javascript
+import { MyModule } from 'my-library';
+import { App } from 'my-library/components';
+import { Header, Footer } from 'my-library/components/App';
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import MyModule from 'my-library/MyModule';
+import App from 'my-library/components/App';
+import Header from 'my-library/components/App/Header';
+import Footer from 'my-library/components/App/Footer';
+```
+
+### Use a transformation file
+
 In cases where the provided default string replacement transformation is not
 sufficient (for example, needing to execute a RegExp on the import name), you
 may instead provide a path to a .js file which exports a function to run
@@ -94,6 +130,7 @@ plugin's path, likely located in `/node_modules/babel-plugin-transform-imports`.
 You may provide any filename, as long as it ends with `.js`.
 
 .babelrc:
+
 ```json
 {
     "plugins": [
@@ -108,8 +145,9 @@ You may provide any filename, as long as it ends with `.js`.
 ```
 
 /path/to/transform.js:
+
 ```js
-module.exports = function(importName) {
+module.exports = function(importName, matches) {
     return 'my-library/etc/' + importName.toUpperCase();
 };
 ```
@@ -155,7 +193,7 @@ module: {
 
 | Name | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `transform` | `string` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the member, aka Grid/Row/Col/etc.  Alternatively, pass a path to a .js file which exports a function to process the transform (see Advanced Transformations) |
+| `transform` | `string` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the import name, aka Grid/Row/Col/etc. ${1-n} will be replaced by the matched group on use regex expressions. Alternatively, pass a path to a .js file which exports a function to process the transform, the function is invoked with the next parameters: (importName, matches). (see Advanced Transformations) |
 | `preventFullImport` | `boolean` | no | `false` | Whether or not to throw when an import is encountered which would cause the entire module to be imported. |
 | `camelCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.camelCase. |
 | `kebabCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.kebabCase. |
