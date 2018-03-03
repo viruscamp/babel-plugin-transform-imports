@@ -83,7 +83,6 @@ describe('import transformations', function() {
         const options = createOptions({ libraryName, transform: _transform })
         const code = transform(`import { LocalThing } from 'package-one/local/path'`, options);
 
-        console.warn(code);
         assert.equal(/require\('package-one\/local\/path\/LocalThing'\);$/m.test(code), true, 'regex is transformed');
     });
 });
