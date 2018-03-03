@@ -7,21 +7,23 @@ var snake = require('lodash.snakecase');
 var pathLib = require('path');
 
 function findOptionFromSource(source, state) {
-    var opt = findKey(state.opts, function (o, _opt) {
-        return _opt === source || !isValidPath(_opt) && new RegExp(_opt).test(source);
+    var opts = state.opts;
+    if (opts[source]) return source;
+    
+    var opt = findKey(opts, function (o, _opt) {
+        return !isValidPath(_opt) && new RegExp(_opt).test(source);
     });
-
     if (opt) return opt;
 
     var isRelativePath = source.match(/^\.{0,2}\//);
     // This block handles relative paths, such as ./components, ../../components, etc.
-    if (!opt && isRelativePath) {
+    if (isRelativePath) {
         const _source = pathLib.resolve(pathLib.join(
             source[0] === '/' ? '' : pathLib.dirname(state.file.opts.filename),
             source
         ));
 
-        if (state.opts[_source]) {
+        if (opts[_source]) {
             return _source;
         }
     }
