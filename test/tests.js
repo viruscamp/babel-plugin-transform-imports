@@ -68,21 +68,22 @@ describe('import transformations', function() {
         assert.equal(/require\('.*LocalThing'\);$/m.test(code), true, 'LocalThing should be directly required');
     });
 
-    it('should handle relative files with regexp', function() {
-        const libraryName = '(.{1,2}/)*/local/path';
+    it('should handle relative files with regex expressions', function() {
+        const libraryName = '((\.{1,2}\/?)*)\/local\/path';
         const _transform = '${1}/local/path/${member}';
         const options = createOptions({ libraryName, transform: _transform })
         const code = transform(`import { LocalThing } from '../../local/path'`, options);
 
-        assert.equal(/require\('.*\/local\/path\/LocalThing'\);$/m.test(code), true, 'regex is transformed');
+        assert.equal(/require\('\.\.\/\.\.\/local\/path\/LocalThing'\);$/m.test(code), true, 'regex is transformed');
     });
 
-    it('should handle regexp', function() {
-        const libraryName = 'package-(\\w+)/local/path';
-        const _transform = 'package-${1}/local/path/${member}';
+    it('should handle regex expressions', function() {
+        const libraryName = 'package-(\\w+)\/?(((\\w*)?\/?)*)';
+        const _transform = 'package-${1}/${2}/${member}';
         const options = createOptions({ libraryName, transform: _transform })
         const code = transform(`import { LocalThing } from 'package-one/local/path'`, options);
 
+        console.warn(code);
         assert.equal(/require\('package-one\/local\/path\/LocalThing'\);$/m.test(code), true, 'regex is transformed');
     });
 });
