@@ -22,7 +22,9 @@
   "license": "ISC",
   "dependencies": {
     "babel-types": "^6.6.0",
+    "is-valid-path": "^0.1.1",
     "lodash.camelcase": "^4.3.0",
+    "lodash.findkey": "^4.6.0",
     "lodash.kebabcase": "^4.1.1",
     "lodash.snakecase": "^4.1.1"
   },
