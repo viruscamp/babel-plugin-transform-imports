@@ -1,14 +1,50 @@
 var types = require('babel-types');
+var isValidPath = require('is-valid-path');
 var camel = require('lodash.camelcase');
+var findKey = require('lodash.findkey');
 var kebab = require('lodash.kebabcase');
 var snake = require('lodash.snakecase');
 var pathLib = require('path');
+
+function findOptionFromSource(source, state) {
+    var opts = state.opts;
+    if (opts[source]) return source;
+    
+    var opt = findKey(opts, function (o, _opt) {
+        return !isValidPath(_opt) && new RegExp(_opt).test(source);
+    });
+    if (opt) return opt;
+
+    var isRelativePath = source.match(/^\.{0,2}\//);
+    // This block handles relative paths, such as ./components, ../../components, etc.
+    if (isRelativePath) {
+        const _source = pathLib.resolve(pathLib.join(
+            source[0] === '/' ? '' : pathLib.dirname(state.file.opts.filename),
+            source
+        ));
+
+        if (opts[_source]) {
+            return _source;
+        }
+    }
+}
+
+function getMatchesFromSource(opt, source) {
+    var regex = new RegExp(opt, 'g');
+    var matches = [];
+    let m;
+    while ((m = regex.exec(source)) !== null) {
+        if (m.index === regex.lastIndex) regex.lastIndex++;
+        m.forEach(match => { matches.push(match); });
+    }
+    return matches;
+}
 
 function barf(msg) {
     throw new Error('babel-plugin-transform-imports: ' + msg);
 }
 
-function transform(transformOption, importName) {
+function transform(transformOption, importName, matches) {
     var isFunction = typeof transformOption === 'function';
     if (/\.js$/i.test(transformOption) || isFunction) {
         var transformFn;
@@ -23,10 +59,13 @@ function transform(transformOption, importName) {
             barf('expected transform function to be exported from ' + transformOption);
         }
 
-        return transformFn(importName);
+        return transformFn(importName, matches);
     }
 
-    return transformOption.replace(/\$\{\s?member\s?\}/ig, importName);
+    return transformOption.replace(/\$\{\s?([\w\d]*)\s?\}/ig, (str, g1) => {
+        if (g1 === 'member') return importName;
+        return matches[g1];
+    });
 }
 
 module.exports = function() {
@@ -41,17 +80,12 @@ module.exports = function() {
 
                 var source = path.node.source.value;
 
-                // This block handles relative paths, such as ./components, ../../components, etc.
-                if (!(source in state.opts) && source.match(/^\.{0,2}\//)) {
-                    source = pathLib.resolve(pathLib.join(
-                        source[0] === '/' ? '' : pathLib.dirname(state.file.opts.filename),
-                        source
-                    ));
-                }
+                var opt = findOptionFromSource(source, state);
+                var isRegexp = opt && !isValidPath(opt);
+                var opts = state.opts[opt];
+                var hasOpts = !!opts;
 
-                if (source in state.opts) {
-                    var opts = state.opts[source];
-
+                if (hasOpts) {
                     if (!opts.transform) {
                         barf('transform option is required for module ' + source);
                     }
@@ -80,6 +114,8 @@ module.exports = function() {
                         }
                     }
 
+                    const matches = isRegexp ? getMatchesFromSource(opt, source) : [];
+
                     memberImports.forEach(function(memberImport) {
                         // Examples of member imports:
                         //      import { member } from 'module'; (ImportSpecifier)
@@ -97,7 +133,7 @@ module.exports = function() {
                         if (opts.kebabCase) importName = kebab(importName);
                         if (opts.snakeCase) importName = snake(importName);
 
-                        var replace = transform(opts.transform, importName);
+                        var replace = transform(opts.transform, importName, matches);
 
                         var newImportSpecifier = (opts.skipDefaultConversion)
                             ? memberImport
