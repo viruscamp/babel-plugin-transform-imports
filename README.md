@@ -107,22 +107,24 @@ to cover all tranformations.
 }
 ```
 
-For instance, the previous configuration will solve properly the next scenarios.
+For instance, the previous configuration will solve properly the next scenarios:
 
 ```javascript
 import { MyModule } from 'my-library';
 import { App } from 'my-library/components';
 import { Header, Footer } from 'my-library/components/App';
+```
 
-      ↓ ↓ ↓ ↓ ↓ ↓
+becomes:
 
+```javascript
 import MyModule from 'my-library/MyModule';
 import App from 'my-library/components/App';
 import Header from 'my-library/components/App/Header';
 import Footer from 'my-library/components/App/Footer';
 ```
 
-### Use a transformation file
+### Using a transformation file
 
 If you need more advanced transformation logic, you may provide a path to a .js
 file which exports a function to run instead.  Keep in mind that the .js file
