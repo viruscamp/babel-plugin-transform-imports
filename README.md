@@ -86,9 +86,11 @@ npm install --save-dev babel-plugin-transform-imports
 
 ## Advanced Transformations
 
-### Use regex expressions
+### Using regular expressions
 
-Sometimes you may enforce the same convention in all folder levels on the structure of your libraries. For achieving this dynamism, you may use regexp to cover all tranformations.
+Sometimes you may enforce the same convention in all folder levels on the
+structure of your libraries. For achieving this dynamism, you may use regexp
+to cover all tranformations.
 
 .babelrc:
 
@@ -122,12 +124,11 @@ import Footer from 'my-library/components/App/Footer';
 
 ### Use a transformation file
 
-In cases where the provided default string replacement transformation is not
-sufficient (for example, needing to execute a RegExp on the import name), you
-may instead provide a path to a .js file which exports a function to run
-instead.  Keep in mind that the .js file will be `require`d relative from this
-plugin's path, likely located in `/node_modules/babel-plugin-transform-imports`.
-You may provide any filename, as long as it ends with `.js`.
+If you need more advanced transformation logic, you may provide a path to a .js
+file which exports a function to run instead.  Keep in mind that the .js file
+will be `require`d relative from this plugin's path, likely located in
+`/node_modules/babel-plugin-transform-imports`.  You may provide any filename,
+as long as it ends with `.js`.
 
 .babelrc:
 
@@ -165,27 +166,25 @@ This can be used as a plugin with babel-loader.
 webpack.config.js:
 ```js
 module: {
-    rules: [
-      {
+    rules: [{
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
         use: {
             loader: 'babel-loader',
-                query: {
-                    plugins: [
-                        [require('babel-plugin-transform-imports'), {
-                            "my-library": {
-                                "transform": function(importName) {
-                                    return 'my-library/etc/' + importName.toUpperCase();
-                                },
-                                preventFullImport: true
-                            }
-                        }]
-                    ]
-                }
+            query: {
+                plugins: [
+                    [require('babel-plugin-transform-imports'), {
+                        "my-library": {
+                            "transform": function(importName) {
+                                return 'my-library/etc/' + importName.toUpperCase();
+                            },
+                            preventFullImport: true
+                        }
+                    }]
+                ]
             }
         }
-    ]
+    }]
 }
 ```
 
@@ -193,7 +192,7 @@ module: {
 
 | Name | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `transform` | `string` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the import name, aka Grid/Row/Col/etc. ${1-n} will be replaced by the matched group on use regex expressions. Alternatively, pass a path to a .js file which exports a function to process the transform, the function is invoked with the next parameters: (importName, matches). (see Advanced Transformations) |
+| `transform` | `string` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the import name, aka Grid/Row/Col/etc., and ${1-n} will be replaced by any matched regular expression groups. Alternatively, pass a path to a .js file which exports a function to process the transform, which is invoked with parameters: (importName, matches). (see Advanced Transformations) |
 | `preventFullImport` | `boolean` | no | `false` | Whether or not to throw when an import is encountered which would cause the entire module to be imported. |
 | `camelCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.camelCase. |
 | `kebabCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.kebabCase. |
