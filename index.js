@@ -9,7 +9,7 @@ var pathLib = require('path');
 function findOptionFromSource(source, state) {
     var opts = state.opts;
     if (opts[source]) return source;
-    
+
     var opt = findKey(opts, function (o, _opt) {
         return !isValidPath(_opt) && new RegExp(_opt).test(source);
     });
@@ -18,7 +18,7 @@ function findOptionFromSource(source, state) {
     var isRelativePath = source.match(/^\.{0,2}\//);
     // This block handles relative paths, such as ./components, ../../components, etc.
     if (isRelativePath) {
-        const _source = pathLib.resolve(pathLib.join(
+        var _source = pathLib.resolve(pathLib.join(
             source[0] === '/' ? '' : pathLib.dirname(state.file.opts.filename),
             source
         ));
@@ -32,10 +32,12 @@ function findOptionFromSource(source, state) {
 function getMatchesFromSource(opt, source) {
     var regex = new RegExp(opt, 'g');
     var matches = [];
-    let m;
+    var m;
     while ((m = regex.exec(source)) !== null) {
         if (m.index === regex.lastIndex) regex.lastIndex++;
-        m.forEach(match => { matches.push(match); });
+        m.forEach(function(match) {
+            matches.push(match);
+        });
     }
     return matches;
 }
@@ -62,7 +64,7 @@ function transform(transformOption, importName, matches) {
         return transformFn(importName, matches);
     }
 
-    return transformOption.replace(/\$\{\s?([\w\d]*)\s?\}/ig, (str, g1) => {
+    return transformOption.replace(/\$\{\s?([\w\d]*)\s?\}/ig, function(str, g1) {
         if (g1 === 'member') return importName;
         return matches[g1];
     });
@@ -114,7 +116,7 @@ module.exports = function() {
                         }
                     }
 
-                    const matches = isRegexp ? getMatchesFromSource(opt, source) : [];
+                    var matches = isRegexp ? getMatchesFromSource(opt, source) : [];
 
                     memberImports.forEach(function(memberImport) {
                         // Examples of member imports:
