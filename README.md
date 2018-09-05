@@ -18,7 +18,7 @@ import merge from 'lodash/merge';
 *Note: this plugin is not restricted to the react-bootstrap and lodash
 libraries.  You may use it with any library.*
 
-## That's stupid, why would you do that?
+## Why?
 
 When Babel encounters a member style import such as:
 
@@ -35,10 +35,10 @@ var Row = reactBootstrap.Row;
 var Col = reactBootstrap.Col;
 ```
 
-Some libraries, such as react-bootstrap and lodash, are rather large and
-pulling in the entire module just to use a few pieces would cause unnecessary
-bloat to your client optimized (webpack etc.) bundle.  The only way around
-this is to use default style imports:
+Which causes the entire library to be loaded, even though only some components
+are needed.  Some libraries are rather large and pulling in the entire module
+would cause unnecessary bloat to your client optimized (webpack etc.) bundle.
+The only way around this is to use default style imports:
 
 ```javascript
 import Grid from 'react-bootstrap/lib/Grid';
@@ -88,9 +88,9 @@ npm install --save-dev babel-plugin-transform-imports
 
 ### Using regular expressions
 
-Sometimes you may enforce the same convention in all folder levels on the
-structure of your libraries. For achieving this dynamism, you may use regexp
-to cover all tranformations.
+Sometimes, you may wish to use regular expressions in your transformation (for
+example, to enforce the same convention in all folder levels on the structure
+of your library).
 
 .babelrc:
 
@@ -107,7 +107,7 @@ to cover all tranformations.
 }
 ```
 
-For instance, the previous configuration will solve properly the next scenarios:
+Causes this code:
 
 ```javascript
 import { MyModule } from 'my-library';
@@ -115,7 +115,7 @@ import { App } from 'my-library/components';
 import { Header, Footer } from 'my-library/components/App';
 ```
 
-becomes:
+to become:
 
 ```javascript
 import MyModule from 'my-library/MyModule';
@@ -124,13 +124,38 @@ import Header from 'my-library/components/App/Header';
 import Footer from 'my-library/components/App/Footer';
 ```
 
+### Using a function as the transformer
+
+If you need more advanced or more specific transformation logic, and are using
+Babel 7+ with a `.babelrc.js` file, you may provide a function instead of a
+string for the `transform` option:
+
+.babelrc.js:
+
+```javascript
+module.exports = {
+    presets: ['@babel/env'],
+    plugins: [
+        ['transform-imports', {
+            'my-library': {
+                transform: function(importName, matches) {
+                    return `my-library/etc/${importName.toUpperCase()}`;
+                },
+                preventFullImport: true,
+            }
+        }]
+    ]
+};
+```
+
 ### Using a transformation file
 
-If you need more advanced transformation logic, you may provide a path to a .js
-file which exports a function to run instead.  Keep in mind that the .js file
-will be `require`d relative from this plugin's path, likely located in
-`/node_modules/babel-plugin-transform-imports`.  You may provide any filename,
-as long as it ends with `.js`.
+If you need the above flexibility of using a function as a transformer, but
+are still on Babel 6 or cannot use a `.babelrc.js` file for some reason, you
+may provide a path to a .js file which exports a function to run instead.
+Keep in mind that the .js file will be `require`d relative from this plugin's
+path, likely located in `/node_modules/babel-plugin-transform-imports`.  You
+may provide any filename, as long as it ends with `.js`.
 
 .babelrc:
 
@@ -149,24 +174,18 @@ as long as it ends with `.js`.
 
 /path/to/transform.js:
 
-```js
+```javascript
 module.exports = function(importName, matches) {
     return 'my-library/etc/' + importName.toUpperCase();
 };
 ```
-
-This is a little bit hacky, but options are a bit limited due to .babelrc being
-a JSON5 file which does not support functions as a type.  In Babel 7.0, it
-appears .babelrc.js files will be supported, at which point this plugin will be
-updated to allow transform functions directly in the configuration file.
-See: https://github.com/babel/babel/pull/4892
 
 ## Webpack
 
 This can be used as a plugin with babel-loader.
 
 webpack.config.js:
-```js
+```javascript
 module: {
     rules: [{
         test: /\.js$/,
@@ -176,8 +195,8 @@ module: {
             query: {
                 plugins: [
                     [require('babel-plugin-transform-imports'), {
-                        "my-library": {
-                            "transform": function(importName) {
+                        'my-library': {
+                            transform: function(importName, matches) {
                                 return 'my-library/etc/' + importName.toUpperCase();
                             },
                             preventFullImport: true
@@ -194,7 +213,7 @@ module: {
 
 | Name | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `transform` | `string` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the import name, aka Grid/Row/Col/etc., and ${1-n} will be replaced by any matched regular expression groups. Alternatively, pass a path to a .js file which exports a function to process the transform, which is invoked with parameters: (importName, matches). (see Advanced Transformations) |
+| `transform` | `string | function` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the import name, aka Grid/Row/Col/etc., and ${1-n} will be replaced by any matched regular expression groups. Alternatively, pass a path to a .js file which exports a function to process the transform, which is invoked with parameters: (importName, matches). If using Babel 7+, a function may be passed directly. (see Advanced Transformations) |
 | `preventFullImport` | `boolean` | no | `false` | Whether or not to throw when an import is encountered which would cause the entire module to be imported. |
 | `camelCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.camelCase. |
 | `kebabCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.kebabCase. |
