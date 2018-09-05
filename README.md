@@ -213,7 +213,7 @@ module: {
 
 | Name | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `transform` | `string | function` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the import name, aka Grid/Row/Col/etc., and ${1-n} will be replaced by any matched regular expression groups. Alternatively, pass a path to a .js file which exports a function to process the transform, which is invoked with parameters: (importName, matches). If using Babel 7+, a function may be passed directly. (see Advanced Transformations) |
+| `transform` | `string or function` | yes | `undefined` | The library name to use instead of the one specified in the import statement.  ${member} will be replaced with the import name, aka Grid/Row/Col/etc., and ${1-n} will be replaced by any matched regular expression groups. Alternatively, pass a path to a .js file which exports a function to process the transform, which is invoked with parameters: (importName, matches). If using Babel 7+, a function may be passed directly. (see Advanced Transformations) |
 | `preventFullImport` | `boolean` | no | `false` | Whether or not to throw when an import is encountered which would cause the entire module to be imported. |
 | `camelCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.camelCase. |
 | `kebabCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.kebabCase. |
