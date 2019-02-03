@@ -1,5 +1,5 @@
 import assert from 'assert';
-import * as babel from 'babel-core';
+import * as babel from '@babel/core';
 import path from 'path';
 
 function createOptions({
@@ -17,8 +17,20 @@ function createOptions({
     };
 };
 
-const fullImportRegex = /require\('react-bootstrap'\);$/gm;
-const memberImportRegex = /require\('react-bootstrap\/lib\/.+'\);$/gm;
+function escapeRegExp(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
+function requireRegExp(source, flags) {
+    return new RegExp(`require\\(('|")` + escapeRegExp(source) + `('|")\\)`, flags)
+};
+
+function requireRegExpNoEscape(source, flags) {
+    return new RegExp(`require\\(('|")` + source + `('|")\\)`, flags)
+}
+
+const fullImportRegex = requireRegExp('react-bootstrap', 'gm');
+const memberImportRegex = requireRegExpNoEscape('react\-bootstrap\/lib\/.+', 'gm');
 
 function occurrences(regex, test) {
     return (test.match(regex) || []).length;
@@ -26,8 +38,9 @@ function occurrences(regex, test) {
 
 function transform(code, options = createOptions({})) {
     return babel.transform(code, {
-        presets: ['es2015'],
-        plugins: [['./index', options]]
+        presets: ['@babel/preset-env'],
+        plugins: [['./index', options]],
+        filename: __filename
     }).code;
 }
 
@@ -64,9 +77,9 @@ describe('import transformations', function() {
         const libraryName = path.join(__dirname, '../local/path');
         const _transform = path.join(__dirname, '../local/path/${member}');
         const options = createOptions({ libraryName, transform: _transform })
-        const code = transform(`import { LocalThing } from './local/path'`, options);
+        const code = transform(`import { LocalThing } from '../local/path'`, options);
 
-        assert.equal(/require\('.*LocalThing'\);$/m.test(code), true, 'LocalThing should be directly required');
+        assert.equal(requireRegExpNoEscape('.*LocalThing', 'm').test(code), true, 'LocalThing should be directly required');
     });
 
     it('should handle relative files with regex expressions', function() {
@@ -75,7 +88,7 @@ describe('import transformations', function() {
         const options = createOptions({ libraryName, transform: _transform })
         const code = transform(`import { LocalThing } from '../../local/path'`, options);
 
-        assert.equal(/require\('\.\.\/\.\.\/local\/path\/LocalThing'\);$/m.test(code), true, 'regex is transformed');
+        assert.equal(requireRegExp('../../local/path/LocalThing', 'm').test(code), true, 'regex is transformed');
     });
 
     it('should handle regex expressions', function() {
@@ -84,7 +97,7 @@ describe('import transformations', function() {
         const options = createOptions({ libraryName, transform: _transform })
         const code = transform(`import { LocalThing } from 'package-one/local/path'`, options);
 
-        assert.equal(/require\('package-one\/local\/path\/LocalThing'\);$/m.test(code), true, 'regex is transformed');
+        assert.equal(requireRegExp('package-one/local/path/LocalThing', 'm').test(code), true, 'regex is transformed');
     });
 });
 
@@ -196,7 +209,7 @@ describe('transformStyle plugin option', function() {
 
         const code = transform(`import { DataTable } from 'ant-design-vue';`, options)
 
-        assert.equal(occurrences(/^require\('ant-design-vue\/lib\/data-table\/style'\)\;$/m, code), 1, 'number of style imports should be 1');
+        assert.equal(occurrences(requireRegExp('ant-design-vue/lib/data-table/style', 'gm'), code), 1, 'number of style imports should be 1');
     });
 });
 
@@ -210,8 +223,8 @@ describe('transformStyle plugin option as array', function() {
 
         const code = transform(`import { DataTable as ADataTable } from 'ant-design-vue';`, options)
 
-        assert.equal(occurrences(/^require\('ant-design-vue\/lib\/data-table\/style'\)\;$/m, code), 1, 'number of style imports should be 1');
-        assert.equal(occurrences(/^require\('ant-design-vue\/lib\/data-table\/style\/css'\);$/m, code), 1, 'number of style/css imports should be 1');
+        assert.equal(occurrences(requireRegExp('ant-design-vue/lib/data-table/style', 'gm'), code), 1, 'number of style imports should be 1');
+        assert.equal(occurrences(requireRegExp('ant-design-vue/lib/data-table/style/css', 'gm'), code), 1, 'number of style/css imports should be 1');
     });
 });
 
@@ -227,6 +240,6 @@ describe('transformStyle plugin option as function', function() {
 
         const code = transform(`import { DataTable } from 'ant-design-vue';`, options)
 
-        assert.equal(occurrences(/^require\('ant-design-vue\/lib\/DATA-TABLE\/STYLE'\)\;$/m, code), 1, 'number of style imports should be 1');
+        assert.equal(occurrences(requireRegExp('ant-design-vue/lib/DATA-TABLE/STYLE', 'gm'), code), 1, 'number of style imports should be 1');
     });
 });

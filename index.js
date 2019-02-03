@@ -1,4 +1,4 @@
-var types = require('babel-types');
+var types = require('@babel/types');
 var isValidPath = require('is-valid-path');
 var camel = require('lodash.camelcase');
 var findKey = require('lodash.findkey');
@@ -18,10 +18,9 @@ function findOptionFromSource(source, state) {
     var isRelativePath = source.match(/^\.{0,2}\//);
     // This block handles relative paths, such as ./components, ../../components, etc.
     if (isRelativePath) {
-        var _source = pathLib.resolve(pathLib.join(
-            source[0] === '/' ? '' : pathLib.dirname(state.file.opts.filename),
-            source
-        ));
+        var _source = pathLib.resolve(source[0] === '/' ? source :
+            pathLib.join(pathLib.dirname(state.file.opts.filename), source)
+        );
 
         if (opts[_source]) {
             return _source;
