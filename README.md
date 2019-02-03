@@ -180,6 +180,43 @@ module.exports = function(importName, matches) {
 };
 ```
 
+### Using option `transformStyle` to import styles
+
+If you need to import style file along with js file, you may set `transformStyle` option.  
+It will generate import with side effects, like "import 'ant-design-vue/lib/date-picker/style';"
+
+The `transformStyle` is just like `transform`, can be string or function. And you can set it to array of string or function, it will generate import with side effects statements as more as the length of the array.
+
+.babelrc:
+
+```json
+{
+    "plugins": [
+        ["transform-imports", {
+            "ant-design-vue": {
+                "kebabCase": true,
+                "transform": "ant-design-vue/lib/${member}",
+                "transformStyle": "ant-design-vue/lib/${member}/style",
+                "preventFullImport": true
+            }
+        }]
+    ]
+}
+```
+
+Causes this code:
+
+```javascript
+import { DatePicker } from 'ant-design-vue';
+```
+
+to become:
+
+```javascript
+import DatePicker from 'ant-design-vue/lib/date-picker';
+import 'ant-design-vue/lib/date-picker/style';
+```
+
 ## Webpack
 
 This can be used as a plugin with babel-loader.
@@ -219,3 +256,4 @@ module: {
 | `kebabCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.kebabCase. |
 | `snakeCase` | `boolean` | no | `false` | When set to true, runs ${member} through _.snakeCase. |
 | `skipDefaultConversion` | `boolean` | no | `false` | When set to true, will preserve `import { X }` syntax instead of converting to `import X`. |
+| `transformStyle` | `string or function or array` | no | `undefined` | Act just like 'transform', but the results will be one or more "import 'source/result';"  |

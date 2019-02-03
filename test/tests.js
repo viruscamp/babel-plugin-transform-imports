@@ -9,10 +9,11 @@ function createOptions({
     kebabCase = false,
     snakeCase = false,
     skipDefaultConversion = false,
-    libraryName = 'react-bootstrap'
+    libraryName = 'react-bootstrap',
+    transformStyle = null,
 }) {
     return {
-        [libraryName]: { transform, preventFullImport, camelCase, kebabCase, snakeCase, skipDefaultConversion }
+        [libraryName]: { transform, preventFullImport, camelCase, kebabCase, snakeCase, skipDefaultConversion, transformStyle }
     };
 };
 
@@ -182,5 +183,50 @@ describe('edge cases', function() {
         const options = createOptions({ transform: null });
 
         assert.throws(() => {transform(`import Bootstrap from 'react-bootstrap';`, options)});
+    });
+});
+
+describe('transformStyle plugin option', function() {
+    it('should add one import statement for side effects only', function() {
+        const options = createOptions({
+            libraryName: 'ant-design-vue',
+            kebabCase: true,
+            transformStyle: 'ant-design-vue/lib/${member}/style'
+        });
+
+        const code = transform(`import { DataTable } from 'ant-design-vue';`, options)
+
+        assert.equal(occurrences(/^require\('ant-design-vue\/lib\/data-table\/style'\)\;$/m, code), 1, 'number of style imports should be 1');
+    });
+});
+
+describe('transformStyle plugin option as array', function() {
+    it('should add two import statements for side effects only', function() {
+        const options = createOptions({
+            libraryName: 'ant-design-vue',
+            kebabCase: true,
+            transformStyle: ['ant-design-vue/lib/${member}/style', 'ant-design-vue/lib/${member}/style/css']
+        });
+
+        const code = transform(`import { DataTable as ADataTable } from 'ant-design-vue';`, options)
+
+        assert.equal(occurrences(/^require\('ant-design-vue\/lib\/data-table\/style'\)\;$/m, code), 1, 'number of style imports should be 1');
+        assert.equal(occurrences(/^require\('ant-design-vue\/lib\/data-table\/style\/css'\);$/m, code), 1, 'number of style/css imports should be 1');
+    });
+});
+
+describe('transformStyle plugin option as function', function() {
+    it('should add one import statement for side effects only', function() {
+        const options = createOptions({
+            libraryName: 'ant-design-vue',
+            kebabCase: true,
+            transformStyle: function(importName, matches) {
+                return `ant-design-vue/lib/${importName.toUpperCase()}/STYLE`;
+            }
+        });
+
+        const code = transform(`import { DataTable } from 'ant-design-vue';`, options)
+
+        assert.equal(occurrences(/^require\('ant-design-vue\/lib\/DATA-TABLE\/STYLE'\)\;$/m, code), 1, 'number of style imports should be 1');
     });
 });

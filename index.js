@@ -145,6 +145,20 @@ module.exports = function() {
                             [newImportSpecifier],
                             types.stringLiteral(replace)
                         ));
+                        
+                        function tryAddTransformStyle (transformStyle) {
+                            var replace = transform(transformStyle, importName, matches);
+                            if (replace != null) {
+                                transforms.push(types.importDeclaration([], types.stringLiteral(replace)));
+                            }
+                        }
+
+                        var transformStyle = opts.transformStyle;
+                        if (Array.isArray(transformStyle)) {
+                            transformStyle.forEach(tryAddTransformStyle);
+                        } else if (transformStyle) {
+                            tryAddTransformStyle(transformStyle)
+                        }
                     });
 
                     if (transforms.length > 0) {
