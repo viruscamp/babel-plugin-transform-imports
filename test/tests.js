@@ -166,6 +166,16 @@ describe('preventFullImport plugin option', function() {
 
         assert.doesNotThrow(() => {transform(`import { Grid, Row as row } from 'react-bootstrap';`, options)});
     });
+
+    it('should logger custom msg when truthy', function() {
+        const options = createOptions({ preventFullImport: true });
+        const optionsWithMsg = Object.assign({
+            preventFullImportMsg (source) {
+                return `请不要全量引入 ${source} !!!`;
+            }
+        }, options);
+        assert.throws(() => {transform(`import Bootstrap from 'react-bootstrap';`, optionsWithMsg)});
+    });
 });
 
 describe('skipDefaultConversion plugin option', function() {
