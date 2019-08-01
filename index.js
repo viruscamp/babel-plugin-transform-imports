@@ -103,7 +103,11 @@ module.exports = function() {
                         //      import name from 'module'; (ImportDefaultSpecifier)
 
                         if (opts.preventFullImport) {
-                            barf('import of entire module ' + source + ' not allowed due to preventFullImport setting');
+                            if (typeof opts.preventFullImportMsg === 'function') {
+                                barf(opts.preventFullImportMsg(source));
+                            } else {
+                                barf('import of entire module ' + source + ' not allowed due to preventFullImport setting');
+                            }
                         }
 
                         if (memberImports.length > 0) {
