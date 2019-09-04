@@ -60,7 +60,7 @@ import * as Bootstrap from 'react-bootstrap';
 ## Installation
 
 ```
-npm install --save-dev babel-plugin-transform-imports
+npm install github:viruscamp/babel-plugin-transform-imports --save-dev
 ```
 
 ## Usage
