@@ -5,15 +5,13 @@ import path from 'path';
 function createOptions({
     preventFullImport = false,
     transform = 'react-bootstrap/lib/${member}',
-    camelCase = false,
-    kebabCase = false,
-    snakeCase = false,
+    memberConverter = null,
     skipDefaultConversion = false,
     libraryName = 'react-bootstrap',
     transformStyle = null,
 }) {
     return {
-        [libraryName]: { transform, preventFullImport, camelCase, kebabCase, snakeCase, skipDefaultConversion, transformStyle }
+        [libraryName]: { transform, preventFullImport, memberConverter, skipDefaultConversion, transformStyle }
     };
 };
 
@@ -101,9 +99,9 @@ describe('import transformations', function() {
     });
 });
 
-describe('camelCase plugin option', function() {
+describe('memberConverter="camel" option', function() {
     it('should use camel casing when set', function() {
-        const options = createOptions({ camelCase: true });
+        const options = createOptions({ memberConverter: 'camel' });
 
         const code = transform(`import { CamelMe } from 'react-bootstrap';`, options);
 
@@ -111,9 +109,19 @@ describe('camelCase plugin option', function() {
     });
 });
 
-describe('kebabCase plugin option', function() {
+describe('memberConverter="pascal" option', function() {
+    it('should use pascal casing when set', function() {
+        const options = createOptions({ memberConverter: 'pascal' });
+
+        const code = transform(`import { pascalMe } from 'react-bootstrap';`, options);
+
+        assert.notEqual(code.indexOf('PascalMe'), -1, 'member name pascalMe should be transformed to PascalMe');
+    });
+});
+
+describe('memberConverter="kebab" option', function() {
     it('should use kebab casing when set', function() {
-        const options = createOptions({ kebabCase: true });
+        const options = createOptions({ memberConverter: 'kebab' });
 
         const code = transform(`import { KebabMe } from 'react-bootstrap';`, options);
 
@@ -121,13 +129,27 @@ describe('kebabCase plugin option', function() {
     });
 });
 
-describe('snakeCase plugin option', function() {
+describe('memberConverter="snake" option', function() {
     it('should use snake casing when set', function() {
-        const options = createOptions({ snakeCase: true });
+        const options = createOptions({ memberConverter: 'snake' });
 
         const code = transform(`import { SnakeMe } from 'react-bootstrap';`, options);
 
         assert.notEqual(code.indexOf('snake_me'), -1, 'member name SnakeMe should be transformed to snake_me');
+    });
+});
+
+describe('memberConverter=(string)=>string option', function() {
+    it('should use custom function', function() {
+        const options = createOptions({
+            memberConverter: function(name) {
+                return '_' + name + '_';
+            }
+        });
+
+        const code = transform(`import { CustomMe } from 'react-bootstrap';`, options);
+
+        assert.notEqual(code.indexOf('_CustomMe_'), -1, 'member name CustomMe should be transformed to _CustomMe_');
     });
 });
 
@@ -203,7 +225,7 @@ describe('transformStyle plugin option', function() {
     it('should add one import statement for side effects only', function() {
         const options = createOptions({
             libraryName: 'ant-design-vue',
-            kebabCase: true,
+            memberConverter: 'kebab',
             transformStyle: 'ant-design-vue/lib/${member}/style'
         });
 
@@ -217,7 +239,7 @@ describe('transformStyle plugin option as array', function() {
     it('should add two import statements for side effects only', function() {
         const options = createOptions({
             libraryName: 'ant-design-vue',
-            kebabCase: true,
+            memberConverter: 'kebab',
             transformStyle: ['ant-design-vue/lib/${member}/style', 'ant-design-vue/lib/${member}/style/css']
         });
 
@@ -232,7 +254,7 @@ describe('transformStyle plugin option as function', function() {
     it('should add one import statement for side effects only', function() {
         const options = createOptions({
             libraryName: 'ant-design-vue',
-            kebabCase: true,
+            memberConverter: 'kebab',
             transformStyle: function(importName, matches) {
                 return `ant-design-vue/lib/${importName.toUpperCase()}/STYLE`;
             }

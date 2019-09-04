@@ -1,9 +1,10 @@
 var types = require('@babel/types');
 var isValidPath = require('is-valid-path');
-var camel = require('lodash.camelcase');
 var findKey = require('lodash.findkey');
+var camel = require('lodash.camelcase');
 var kebab = require('lodash.kebabcase');
 var snake = require('lodash.snakecase');
+var upperFirst = require('lodash.upperfirst');
 var pathLib = require('path');
 
 function findOptionFromSource(source, state) {
@@ -130,9 +131,11 @@ module.exports = function() {
                         //      import { Grid as gird } from 'react-bootstrap/lib/Grid';
 
                         var importName = memberImport.imported.name;
-                        if (opts.camelCase) importName = camel(importName);
-                        if (opts.kebabCase) importName = kebab(importName);
-                        if (opts.snakeCase) importName = snake(importName);
+                        if (opts.memberConverter === 'camel') importName = camel(importName);
+                        else if (opts.memberConverter === 'pascal') importName = upperFirst(camel(importName));
+                        else if (opts.memberConverter === 'kebab') importName = kebab(importName);
+                        else if (opts.memberConverter === 'snake') importName = snake(importName);
+                        else if (typeof(opts.memberConverter) === 'function') importName = opts.memberConverter(importName);
 
                         var replace = transform(opts.transform, importName, matches);
 
