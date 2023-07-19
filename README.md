@@ -138,7 +138,7 @@ module.exports = {
     plugins: [
         ['transform-imports', {
             'my-library': {
-                transform: function(importName, matches) {
+                transform: function(importName, matches, filename) {
                     return `my-library/etc/${importName.toUpperCase()}`;
                 },
                 preventFullImport: true,

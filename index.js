@@ -47,7 +47,7 @@ function barf(msg) {
     throw new Error('babel-plugin-transform-imports: ' + msg);
 }
 
-function transform(transformOption, importName, matches) {
+function transform(transformOption, importName, matches, filename) {
     var isFunction = typeof transformOption === 'function';
     if (/\.js$/i.test(transformOption) || isFunction) {
         var transformFn;
@@ -62,7 +62,7 @@ function transform(transformOption, importName, matches) {
             barf('expected transform function to be exported from ' + transformOption);
         }
 
-        return transformFn(importName, matches);
+        return transformFn(importName, matches, filename);
     }
 
     return transformOption.replace(/\$\{\s?([\w\d]*)\s?\}/ig, function(str, g1) {
@@ -71,10 +71,17 @@ function transform(transformOption, importName, matches) {
     });
 }
 
+const replacements = [];
+
 module.exports = function() {
     return {
         visitor: {
             ImportDeclaration: function (path, state) {
+                // skip transforming imports that were already transformed
+                if (replacements.indexOf(path.node) > -1) {
+                    return;
+                }
+
                 // https://github.com/babel/babel/tree/master/packages/babel-types#timportdeclarationspecifiers-source
 
                 // path.node has properties 'source' and 'specifiers' attached.
@@ -88,6 +95,8 @@ module.exports = function() {
                 var opts = state.opts[opt];
                 var hasOpts = !!opts;
 
+                var matches = isRegexp ? getMatchesFromSource(opt, source) : [];
+
                 if (hasOpts) {
                     if (!opts.transform) {
                         barf('transform option is required for module ' + source);
@@ -95,7 +104,7 @@ module.exports = function() {
 
                     var transforms = [];
 
-                    var fullImports = path.node.specifiers.filter(function(specifier) { return specifier.type !== 'ImportSpecifier' });
+                    var fullImports = path.node.specifiers.filter(function (specifier) { return specifier.type !== 'ImportSpecifier' })
                     var memberImports = path.node.specifiers.filter(function(specifier) { return specifier.type === 'ImportSpecifier' });
 
                     if (fullImports.length > 0) {
@@ -107,17 +116,9 @@ module.exports = function() {
                             barf('import of entire module ' + source + ' not allowed due to preventFullImport setting');
                         }
 
-                        if (memberImports.length > 0) {
-                            // Swap out the import with one that doesn't include member imports.  Member imports should each get their own import line
-                            // transform this:
-                            //      import Bootstrap, { Grid } from 'react-bootstrap';
-                            // into this:
-                            //      import Bootstrap from 'react-bootstrap';
-                            transforms.push(types.importDeclaration(fullImports, types.stringLiteral(source)));
-                        }
+                        var replace = transform(opts.transform, undefined, matches, state.filename);
+                        transforms.push(types.importDeclaration(fullImports, types.stringLiteral(replace)));                        
                     }
-
-                    var matches = isRegexp ? getMatchesFromSource(opt, source) : [];
 
                     memberImports.forEach(function(memberImport) {
                         // Examples of member imports:
@@ -138,7 +139,7 @@ module.exports = function() {
                         else if (opts.memberConverter === 'snake') importName = snake(importName);
                         else if (typeof(opts.memberConverter) === 'function') importName = opts.memberConverter(importName);
 
-                        var replace = transform(opts.transform, importName, matches);
+                        var replace = transform(opts.transform, importName, matches, state.filename);
 
                         var newImportSpecifier = (opts.skipDefaultConversion)
                             ? memberImport
@@ -165,6 +166,7 @@ module.exports = function() {
                     });
 
                     if (transforms.length > 0) {
+                        replacements.push(...transforms);
                         path.replaceWithMultiple(transforms);
                     }
                 }
