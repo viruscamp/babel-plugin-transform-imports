@@ -71,10 +71,17 @@ function transform(transformOption, importName, matches, filename) {
     });
 }
 
+const replacements = [];
+
 module.exports = function() {
     return {
         visitor: {
             ImportDeclaration: function (path, state) {
+                // skip transforming imports that were already transformed
+                if (replacements.indexOf(path.node) > -1) {
+                    return;
+                }
+
                 // https://github.com/babel/babel/tree/master/packages/babel-types#timportdeclarationspecifiers-source
 
                 // path.node has properties 'source' and 'specifiers' attached.
@@ -165,6 +172,7 @@ module.exports = function() {
                     });
 
                     if (transforms.length > 0) {
+                        replacements.push(...transforms);
                         path.replaceWithMultiple(transforms);
                     }
                 }
