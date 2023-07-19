@@ -47,7 +47,7 @@ function barf(msg) {
     throw new Error('babel-plugin-transform-imports: ' + msg);
 }
 
-function transform(transformOption, importName, matches) {
+function transform(transformOption, importName, matches, filename) {
     var isFunction = typeof transformOption === 'function';
     if (/\.js$/i.test(transformOption) || isFunction) {
         var transformFn;
@@ -62,7 +62,7 @@ function transform(transformOption, importName, matches) {
             barf('expected transform function to be exported from ' + transformOption);
         }
 
-        return transformFn(importName, matches);
+        return transformFn(importName, matches, filename);
     }
 
     return transformOption.replace(/\$\{\s?([\w\d]*)\s?\}/ig, function(str, g1) {
@@ -138,7 +138,7 @@ module.exports = function() {
                         else if (opts.memberConverter === 'snake') importName = snake(importName);
                         else if (typeof(opts.memberConverter) === 'function') importName = opts.memberConverter(importName);
 
-                        var replace = transform(opts.transform, importName, matches);
+                        var replace = transform(opts.transform, importName, matches, state.filename);
 
                         var newImportSpecifier = (opts.skipDefaultConversion)
                             ? memberImport
