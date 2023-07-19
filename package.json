@@ -16,7 +16,7 @@
   },
   "homepage": "https://bitbucket.org/amctheatres/babel-transform-imports",
   "scripts": {
-    "test": "node_modules/.bin/mocha --compilers js:babel-register"
+    "test": "mocha --compilers js:babel-register"
   },
   "author": "AMC Theatres",
   "license": "ISC",
